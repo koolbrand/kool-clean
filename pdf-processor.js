@@ -17,12 +17,12 @@ export async function processPDF(file, logoBytes, onProgress) {
         const { width, height } = page.getSize();
 
         // Proporciones mejoradas para cubrir perfectamente el área de NotebookLM
-        const rectWidth = width * 0.18; 
-        const rectHeight = height * 0.06; 
+        const rectWidth = width * 0.18;
+        const rectHeight = height * 0.08; // Un poco más alto para centrar mejor el logo oficial
         const x = width - rectWidth; // Sin margen derecho
         const y = 0; // Desde el fondo
 
-        // Dibamos el rectángulo base (blanco sólido)
+        // Dibujamos el parche blanco sólido para borrar el original
         page.drawRectangle({
             x: x,
             y: y,
@@ -32,13 +32,14 @@ export async function processPDF(file, logoBytes, onProgress) {
             opacity: 1,
         });
 
-        // Si tenemos logo, lo ponemos encima.
-        // Como el logo ya tiene fondo blanco propio (del canvas), se verá perfecto.
+        // Si tenemos logo, lo ponemos encima centrado
         if (logoImage) {
-            const logoScale = 0.14;
+            const logoScale = 0.20; // Escala ajustada para el logo oficial (502x192)
             const logoDims = logoImage.scale(logoScale);
-            // Centramos el logo dentro del parche blanco
+            
+            // Centrado horizontal relativo al parche
             const logoX = width - logoDims.width - (width * 0.015);
+            // Centrado vertical relativo al parche
             const logoY = (rectHeight - logoDims.height) / 2;
 
             page.drawImage(logoImage, {
