@@ -164,14 +164,16 @@ function resetApp() {
     processedBlob = null;
 }
 
-// Función para generar el logo de Koolbrand dinámicamente
+// Función para generar el logo de Koolbrand dinámicamente con fondo blanco
 async function generateKoolLogo() {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     canvas.width = 400;
-    canvas.height = 120;
+    canvas.height = 140;
 
-    // Fondo transparente (ya lo es por defecto)
+    // Fondo blanco sólido (como pidió el usuario)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Texto "kool"
     ctx.font = 'bold 80px Inter, sans-serif';
@@ -180,21 +182,28 @@ async function generateKoolLogo() {
 
     // Texto "brand"
     const koolWidth = ctx.measureText('kool').width;
-    ctx.fillStyle = '#374151'; // Gris oscuro
+    ctx.fillStyle = '#333333'; // Gris casi negro
     ctx.fillText('brand', 10 + koolWidth, 80);
+    
+    // El símbolo (R)
+    const brandWidth = ctx.measureText('brand').width;
+    ctx.font = 'bold 20px Inter, sans-serif';
+    ctx.fillText('®', 10 + koolWidth + brandWidth + 5, 45);
 
     // Tagline "we [corazón] brands"
-    ctx.font = '300 30px Inter, sans-serif';
-    ctx.fillStyle = '#6b7280'; // Gris medio
-    ctx.fillText('we', 15, 110);
+    ctx.font = '400 32px Inter, sans-serif';
+    ctx.fillStyle = '#4b5563'; // Gris oscuro para tagline
+    
+    const taglineX = 140; 
+    ctx.fillText('we', taglineX, 120);
     
     const weWidth = ctx.measureText('we ').width;
     ctx.fillStyle = '#84cc16'; // Corazón verde
-    ctx.fillText('❤', 15 + weWidth, 110);
+    ctx.fillText('❤', taglineX + weWidth, 120);
     
     const heartWidth = ctx.measureText('❤ ').width;
-    ctx.fillStyle = '#6b7280';
-    ctx.fillText('brands', 15 + weWidth + heartWidth, 110);
+    ctx.fillStyle = '#4b5563';
+    ctx.fillText('brands', taglineX + weWidth + heartWidth, 120);
 
     // Convertir a bytes
     return new Promise((resolve) => {

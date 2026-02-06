@@ -22,22 +22,24 @@ export async function processPDF(file, logoBytes, onProgress) {
         const x = width - rectWidth; // Sin margen derecho
         const y = 0; // Desde el fondo
 
-        // Dibujamos el parche. 
+        // Dibamos el rectángulo base (blanco sólido)
         page.drawRectangle({
             x: x,
             y: y,
             width: rectWidth,
             height: rectHeight,
-            color: rgb(1, 1, 1), // Blanco para el parche base
+            color: rgb(1, 1, 1),
             opacity: 1,
         });
 
-        // Si tenemos logo, lo ponemos encima para dar el toque premium
+        // Si tenemos logo, lo ponemos encima.
+        // Como el logo ya tiene fondo blanco propio (del canvas), se verá perfecto.
         if (logoImage) {
-            const logoScale = 0.15;
+            const logoScale = 0.14;
             const logoDims = logoImage.scale(logoScale);
-            const logoX = width - logoDims.width - (width * 0.02);
-            const logoY = height * 0.005;
+            // Centramos el logo dentro del parche blanco
+            const logoX = width - logoDims.width - (width * 0.015);
+            const logoY = (rectHeight - logoDims.height) / 2;
 
             page.drawImage(logoImage, {
                 x: logoX,
