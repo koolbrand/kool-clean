@@ -1,7 +1,8 @@
 import { processPDF } from './pdf-processor.js';
 
 // PocketBase Initialization
-const pb = new window.PocketBase('https://pocketbase.koolgrowth.com');
+const pbUrl = import.meta.env.VITE_POCKETBASE_URL || 'https://pocketbase.koolgrowth.com';
+const pb = new window.PocketBase(pbUrl);
 
 const loginView = document.getElementById('login-view');
 const appView = document.getElementById('app-view');
