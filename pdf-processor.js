@@ -1,15 +1,27 @@
 import { PDFDocument, rgb } from 'pdf-lib';
 
 export async function processPDF(file, logoBytes, onProgress) {
+    if (onProgress) onProgress(0, 0, 0, 'Iniciando lectura del archivo...');
     const arrayBuffer = await file.arrayBuffer();
+    
+    // Yield to allow UI to show "Cargando..."
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
+    if (onProgress) onProgress(0, 0, 0, 'Analizando estructura del PDF...');
     const pdfDoc = await PDFDocument.load(arrayBuffer);
+    
+    // Yield after heavy load
+    await new Promise(resolve => setTimeout(resolve, 50));
+    
     const pages = pdfDoc.getPages();
     const totalPages = pages.length;
 
     // Embed logo if provided
     let logoImage = null;
     if (logoBytes) {
+        if (onProgress) onProgress(0, 0, totalPages, 'Preparando logo oficial...');
         logoImage = await pdfDoc.embedPng(logoBytes);
+        await new Promise(resolve => setTimeout(resolve, 20));
     }
 
     for (let i = 0; i < totalPages; i++) {
@@ -18,9 +30,9 @@ export async function processPDF(file, logoBytes, onProgress) {
 
         // Proporciones mejoradas para cubrir perfectamente el área de NotebookLM
         const rectWidth = width * 0.18;
-        const rectHeight = height * 0.08; // Un poco más alto para centrar mejor el logo oficial
-        const x = width - rectWidth; // Sin margen derecho
-        const y = 0; // Desde el fondo
+        const rectHeight = height * 0.08; 
+        const x = width - rectWidth; 
+        const y = 0; 
 
         // Dibujamos el parche blanco sólido para borrar el original
         page.drawRectangle({
@@ -34,12 +46,10 @@ export async function processPDF(file, logoBytes, onProgress) {
 
         // Si tenemos logo, lo ponemos encima centrado
         if (logoImage) {
-            const logoScale = 0.20; // Escala ajustada para el logo oficial (502x192)
+            const logoScale = 0.20; 
             const logoDims = logoImage.scale(logoScale);
             
-            // Centrado horizontal relativo al parche
             const logoX = width - logoDims.width - (width * 0.015);
-            // Centrado vertical relativo al parche
             const logoY = (rectHeight - logoDims.height) / 2;
 
             page.drawImage(logoImage, {
@@ -51,12 +61,19 @@ export async function processPDF(file, logoBytes, onProgress) {
         }
 
         if (onProgress) {
-            onProgress(Math.round(((i + 1) / totalPages) * 100), i + 1, totalPages);
-            // Pequeña pausa para permitir que el navegador actualice la UI (progress bar)
-            await new Promise(resolve => setTimeout(resolve, 0));
+            // Reservamos el 10% final para el guardado
+            const progress = Math.round(((i + 1) / totalPages) * 90);
+            onProgress(progress, i + 1, totalPages, `Procesando página ${i + 1} de ${totalPages}...`);
+            // Pausa un poco más larga para asegurar que el navegador respire
+            await new Promise(resolve => setTimeout(resolve, 10));
         }
     }
 
+    if (onProgress) onProgress(95, totalPages, totalPages, 'Generando archivo final (esto puede tardar)...');
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const pdfBytes = await pdfDoc.save();
+    
+    if (onProgress) onProgress(100, totalPages, totalPages, '¡Proceso finalizado!');
     return new Blob([pdfBytes], { type: 'application/pdf' });
 }
