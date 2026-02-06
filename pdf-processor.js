@@ -52,6 +52,8 @@ export async function processPDF(file, logoBytes, onProgress) {
 
         if (onProgress) {
             onProgress(Math.round(((i + 1) / totalPages) * 100), i + 1, totalPages);
+            // Pequeña pausa para permitir que el navegador actualice la UI (progress bar)
+            await new Promise(resolve => setTimeout(resolve, 0));
         }
     }
 
