@@ -107,7 +107,11 @@ async function handleFile(file) {
     processLabel.textContent = 'Procesando...';
 
     try {
-        processedBlob = await processPDF(file, (percent, current, total) => {
+        // Generamos el logo de Koolbrand on-the-fly con un Canvas
+        // Esto evita tener que subir archivos binarios y asegura máxima nitidez
+        const logoBytes = await generateKoolLogo();
+
+        processedBlob = await processPDF(file, logoBytes, (percent, current, total) => {
             progressBar.style.width = `${percent}%`;
             percentageText.textContent = `${percent}%`;
             pageCountText.textContent = `Página ${current} de ${total}`;
@@ -158,4 +162,44 @@ function resetApp() {
     statusArea.classList.add('hidden');
     fileInput.value = '';
     processedBlob = null;
+}
+
+// Función para generar el logo de Koolbrand dinámicamente
+async function generateKoolLogo() {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 400;
+    canvas.height = 120;
+
+    // Fondo transparente (ya lo es por defecto)
+
+    // Texto "kool"
+    ctx.font = 'bold 80px Inter, sans-serif';
+    ctx.fillStyle = '#84cc16'; // Verde Kool
+    ctx.fillText('kool', 10, 80);
+
+    // Texto "brand"
+    const koolWidth = ctx.measureText('kool').width;
+    ctx.fillStyle = '#374151'; // Gris oscuro
+    ctx.fillText('brand', 10 + koolWidth, 80);
+
+    // Tagline "we [corazón] brands"
+    ctx.font = '300 30px Inter, sans-serif';
+    ctx.fillStyle = '#6b7280'; // Gris medio
+    ctx.fillText('we', 15, 110);
+    
+    const weWidth = ctx.measureText('we ').width;
+    ctx.fillStyle = '#84cc16'; // Corazón verde
+    ctx.fillText('❤', 15 + weWidth, 110);
+    
+    const heartWidth = ctx.measureText('❤ ').width;
+    ctx.fillStyle = '#6b7280';
+    ctx.fillText('brands', 15 + weWidth + heartWidth, 110);
+
+    // Convertir a bytes
+    return new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+            blob.arrayBuffer().then(resolve);
+        }, 'image/png');
+    });
 }
